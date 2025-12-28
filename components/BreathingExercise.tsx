@@ -1,14 +1,41 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ExerciseType } from '../types';
+import { ExerciseType, Language } from '../types';
 
 interface BreathingExerciseProps {
   type: ExerciseType;
+  language: Language;
   onClose: () => void;
 }
 
-const BreathingExercise: React.FC<BreathingExerciseProps> = ({ type, onClose }) => {
-  const [phase, setPhase] = useState<'Вдох' | 'Выдох' | 'Задержка'>('Вдох');
+const translations = {
+  ru: {
+    inhale: 'Вдох',
+    exhale: 'Выдох',
+    hold: 'Задержка',
+    cycle: 'Цикл',
+    of: 'из',
+    finish: 'Завершить',
+    continue: 'Продолжайте до ощущения спокойствия',
+    title46: 'Дыхание 4-6',
+    titleBox: 'Коробочное дыхание'
+  },
+  en: {
+    inhale: 'Inhale',
+    exhale: 'Exhale',
+    hold: 'Hold',
+    cycle: 'Cycle',
+    of: 'of',
+    finish: 'Finish',
+    continue: 'Continue until you feel calm',
+    title46: '4-6 Breathing',
+    titleBox: 'Box Breathing'
+  }
+};
+
+const BreathingExercise: React.FC<BreathingExerciseProps> = ({ type, language, onClose }) => {
+  const t = translations[language];
+  const [phase, setPhase] = useState<string>(t.inhale);
   const [timeLeft, setTimeLeft] = useState(0);
   const [cycle, setCycle] = useState(1);
   const [isActive, setIsActive] = useState(true);
@@ -19,33 +46,33 @@ const BreathingExercise: React.FC<BreathingExerciseProps> = ({ type, onClose }) 
       while (currentCycle <= 8 && isActive) {
         setCycle(currentCycle);
         // Inhale 4
-        setPhase('Вдох');
+        setPhase(t.inhale);
         for (let i = 4; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
         // Exhale 6
-        setPhase('Выдох');
+        setPhase(t.exhale);
         for (let i = 6; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
         currentCycle++;
       }
       onClose();
     };
     run();
-  }, [isActive, onClose]);
+  }, [isActive, onClose, t]);
 
   const startBox = useCallback(() => {
     const run = async () => {
       while (isActive) {
-        setPhase('Вдох');
+        setPhase(t.inhale);
         for (let i = 4; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
-        setPhase('Задержка');
+        setPhase(t.hold);
         for (let i = 4; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
-        setPhase('Выдох');
+        setPhase(t.exhale);
         for (let i = 4; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
-        setPhase('Задержка');
+        setPhase(t.hold);
         for (let i = 4; i > 0; i--) { setTimeLeft(i); await new Promise(r => setTimeout(r, 1000)); if(!isActive) return; }
       }
     };
     run();
-  }, [isActive]);
+  }, [isActive, t]);
 
   useEffect(() => {
     if (type === ExerciseType.BREATHING_4_6) start46();
@@ -55,25 +82,25 @@ const BreathingExercise: React.FC<BreathingExerciseProps> = ({ type, onClose }) 
   }, [type, start46, startBox]);
 
   const getScale = () => {
-    if (phase === 'Вдох') return 'scale-150';
-    if (phase === 'Выдох') return 'scale-100';
+    if (phase === t.inhale) return 'scale-150';
+    if (phase === t.exhale) return 'scale-100';
     return 'scale-125'; // For Hold
   };
 
   const getBgColor = () => {
-    if (phase === 'Вдох') return 'bg-emerald-400';
-    if (phase === 'Выдох') return 'bg-blue-400';
-    return 'bg-amber-400';
+    if (phase === t.inhale) return 'bg-emerald-400 dark:bg-emerald-500';
+    if (phase === t.exhale) return 'bg-blue-400 dark:bg-blue-500';
+    return 'bg-amber-400 dark:bg-amber-500';
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center text-center">
-        <h2 className="text-2xl font-semibold mb-2 text-slate-800">
-          {type === ExerciseType.BREATHING_4_6 ? 'Дыхание 4-6' : 'Коробочное дыхание'}
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-transparent dark:border-slate-800 flex flex-col items-center text-center">
+        <h2 className="text-2xl font-semibold mb-2 text-slate-800 dark:text-slate-100">
+          {type === ExerciseType.BREATHING_4_6 ? t.title46 : t.titleBox}
         </h2>
-        <p className="text-slate-500 mb-8">
-          {type === ExerciseType.BREATHING_4_6 ? `Цикл ${cycle} из 8` : 'Продолжайте до ощущения спокойствия'}
+        <p className="text-slate-500 dark:text-slate-400 mb-8">
+          {type === ExerciseType.BREATHING_4_6 ? `${t.cycle} ${cycle} ${t.of} 8` : t.continue}
         </p>
 
         <div className="relative w-64 h-64 flex items-center justify-center mb-8">
@@ -84,15 +111,15 @@ const BreathingExercise: React.FC<BreathingExerciseProps> = ({ type, onClose }) 
           </div>
         </div>
 
-        <div className="text-3xl font-medium text-slate-700 mb-8 animate-pulse">
+        <div className="text-3xl font-medium text-slate-700 dark:text-slate-200 mb-8 animate-pulse">
           {phase}
         </div>
 
         <button 
           onClick={onClose}
-          className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-6 py-2 rounded-full transition-colors font-medium"
+          className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-6 py-2 rounded-full transition-colors font-medium border border-transparent dark:border-slate-700"
         >
-          Завершить
+          {t.finish}
         </button>
       </div>
     </div>

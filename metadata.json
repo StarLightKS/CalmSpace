@@ -1,5 +1,7 @@
 {
-  "name": "Copy of ZenStudent - Mental Health Support",
-  "description": "A supportive chat-bot for students designed to help manage stress and anxiety through empathetic dialogue, breathing exercises, and short meditations.",
-  "requestFramePermissions": []
+  "name": "CalmSpace - Mental Health Support",
+  "description": "A supportive CBT-based chat-bot designed to help manage stress and anxiety through empathetic dialogue and mindfulness tools.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }
